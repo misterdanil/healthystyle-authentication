@@ -2,7 +2,6 @@ package org.healthystyle.authentication.repository.role;
 
 import org.healthystyle.model.role.Name;
 import org.healthystyle.model.role.Role;
-import org.healthystyle.model.role.opportunity.Opportunity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;

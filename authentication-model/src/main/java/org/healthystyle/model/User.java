@@ -2,9 +2,13 @@ package org.healthystyle.model;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import org.healthystyle.model.role.Role;
 import org.healthystyle.model.security.RefreshToken;
+import org.healthystyle.model.sex.Sex;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -13,6 +17,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.SequenceGenerator;
@@ -40,11 +46,14 @@ public class User {
 	@Column(nullable = false, columnDefinition = "VARCHAR(100) CONSTRAINT CK_valid_password CHECK (password ~ '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&_])[A-Za-z\\d@$!%*?&_]{8,}$')")
 	private String password;
 	@Temporal(TemporalType.DATE)
-	@Column(nullable = false, columnDefinition = "DATE CONSTRAINT CK_min_age CHECK (date_part('year', age(birthdate)) > 18)")
+	@Column(columnDefinition = "DATE CONSTRAINT CK_min_age CHECK (date_part('year', age(birthdate)) > 18)")
 	private LocalDate birthdate;
 	@ManyToOne
-	@JoinColumn(name = "role_id", nullable = false)
-	private Role role;
+	@JoinColumn(name = "sex_id")
+	private Sex sex;
+	@ManyToMany
+	@JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id", nullable = false), inverseJoinColumns = @JoinColumn(name = "role_id", nullable = false))
+	private List<Role> roles;
 	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
 	private RefreshToken refreshToken;
 	@Column(name = "image_id")
@@ -58,12 +67,12 @@ public class User {
 	@Column(name = "removed_on", nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
 	private Instant removedOn;
 
-	public User(String username, String email, String password, Role role) {
+	public User(String username, String email, String password, Role... roles) {
 		super();
 		this.username = username;
 		this.email = email;
 		this.password = password;
-		this.role = role;
+		addRoles(roles);
 	}
 
 	public Long getId() {
@@ -126,12 +135,24 @@ public class User {
 		this.birthdate = birthdate;
 	}
 
-	public Role getRole() {
-		return role;
+	public Sex getSex() {
+		return sex;
 	}
 
-	public void setRole(Role role) {
-		this.role = role;
+	public void setSex(Sex sex) {
+		this.sex = sex;
+	}
+
+	public List<Role> getRoles() {
+		if (roles == null) {
+			roles = new ArrayList<>();
+		}
+
+		return roles;
+	}
+
+	public void addRoles(Role... roles) {
+		getRoles().addAll(Arrays.asList(roles));
 	}
 
 	public RefreshToken getRefreshToken() {
