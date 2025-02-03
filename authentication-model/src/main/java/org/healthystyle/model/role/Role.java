@@ -13,13 +13,15 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 
@@ -33,13 +35,12 @@ public class Role {
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false, unique = true)
 	private Name name;
-	@OneToOne(mappedBy = "parentRole")
-	@JoinColumn(name = "sub_role_id")
-	private Role subRole;
-	@OneToOne(mappedBy = "subRole")
+	@ManyToOne
 	@JoinColumn(name = "parent_role_id")
-	private Role parentRole;
-	@OneToMany(cascade = CascadeType.ALL)
+	private Role parent;
+	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "parent", fetch = FetchType.LAZY)
+	private List<Role> childRoles;
+	@ManyToMany(cascade = CascadeType.ALL)
 	@JoinTable(name = "role_opportunity", joinColumns = @JoinColumn(name = "role_id", nullable = false), inverseJoinColumns = @JoinColumn(name = "opportunity_id", nullable = false))
 	private List<Opportunity> opportunities;
 
@@ -55,10 +56,9 @@ public class Role {
 		this.opportunities = new ArrayList<>(Arrays.asList(opportunities));
 	}
 
-	public Role(Name name, Role subRole, Role parentRole, Opportunity... opportunities) {
+	public Role(Name name, Role parent, Opportunity... opportunities) {
 		this(name, opportunities);
-		this.subRole = subRole;
-		this.parentRole = parentRole;
+		this.parent = parent;
 	}
 
 	public Long getId() {
@@ -73,20 +73,20 @@ public class Role {
 		this.name = name;
 	}
 
-	public Role getSubRole() {
-		return subRole;
+	public Role getParent() {
+		return parent;
 	}
 
-	public void setSubRole(Role subRole) {
-		this.subRole = subRole;
+	public void setParent(Role parent) {
+		this.parent = parent;
 	}
 
-	public Role getParentRole() {
-		return parentRole;
+	public List<Role> getChildRoles() {
+		return childRoles;
 	}
 
-	public void setParentRole(Role parentRole) {
-		this.parentRole = parentRole;
+	public void addChildRole(Role childRole) {
+		getChildRoles().add(childRole);
 	}
 
 	public List<Opportunity> getOpportunities() {
