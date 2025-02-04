@@ -6,8 +6,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.healthystyle.model.confidentiality.Confidentiality;
 import org.healthystyle.model.role.Role;
-import org.healthystyle.model.security.RefreshToken;
+import org.healthystyle.model.security.code.ConfirmCode;
+import org.healthystyle.model.security.refreshtoken.RefreshToken;
 import org.healthystyle.model.sex.Sex;
 
 import jakarta.persistence.CascadeType;
@@ -55,11 +57,15 @@ public class User {
 	@JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id", nullable = false), inverseJoinColumns = @JoinColumn(name = "role_id", nullable = false))
 	private List<Role> roles;
 	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+	private ConfirmCode confirmCode;
+	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
 	private RefreshToken refreshToken;
 	@Column(name = "image_id")
 	private Long imageId;
 	@Column(name = "region_id")
 	private Long regionId;
+	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+	private Confidentiality confidentiality;
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "created_on", nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
 	private Instant createdOn;
@@ -155,6 +161,14 @@ public class User {
 		getRoles().addAll(Arrays.asList(roles));
 	}
 
+	public ConfirmCode getConfirmCode() {
+		return confirmCode;
+	}
+
+	public void setConfirmCode(ConfirmCode confirmCode) {
+		this.confirmCode = confirmCode;
+	}
+
 	public RefreshToken getRefreshToken() {
 		return refreshToken;
 	}
@@ -169,6 +183,30 @@ public class User {
 
 	public void setImageId(Long imageId) {
 		this.imageId = imageId;
+	}
+
+	public Long getRegionId() {
+		return regionId;
+	}
+
+	public void setRegionId(Long regionId) {
+		this.regionId = regionId;
+	}
+
+	public Confidentiality getConfidentiality() {
+		return confidentiality;
+	}
+
+	public Instant getCreatedOn() {
+		return createdOn;
+	}
+
+	public Instant getRemovedOn() {
+		return removedOn;
+	}
+
+	public void setRemovedOn(Instant removedOn) {
+		this.removedOn = removedOn;
 	}
 
 }
