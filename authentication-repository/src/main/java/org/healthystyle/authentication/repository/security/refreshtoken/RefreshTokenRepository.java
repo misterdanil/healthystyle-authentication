@@ -24,7 +24,7 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long
 	Page<RefreshToken> findByAlgorithm(Algorithm algorithm, Pageable pageable);
 
 	@Query("SELECT rt FROM RefreshToken rt WHERE rt.issuedAt >= :issuedAt AND rt.expiredAt <= :expiredAt")
-	Page<ConfirmCode> findByTime(Instant issuedAt, Instant expiredAt);
+	Page<RefreshToken> findByTime(Instant issuedAt, Instant expiredAt);
 
 	@Modifying
 	@Query("DELETE FROM RefreshToken rt INNER JOIN rt.user u WHERE u.id = :id")

@@ -17,7 +17,7 @@ public interface RoleRepository extends JpaRepository<Role, Long> {
 	@Query("SELECT r FROM Role r WHERE r.parent.id = :parentRoleId")
 	Page<Role> findByParentRole(Long parentRoleId, Pageable pageable, Sort sort);
 	
-	@Query("SELECT parent FROM Role r WHERE r.id = :id")
+	@Query("SELECT r.parent FROM Role r WHERE r.id = :id")
 	Role findParentRole(Long id);
 	
 	@Query(value = "WITH RECURSIVE Parents AS ("
@@ -41,7 +41,7 @@ public interface RoleRepository extends JpaRepository<Role, Long> {
 			+ "UNION ALL"
 			+ "SELECT r FROM role AS r INNER JOIN OpportunityRoles AS or ON or.id = r.parent_role_id"
 			+ ")"
-			+ "SELECT * FROM OpportunityRoles")
+			+ "SELECT * FROM OpportunityRoles", nativeQuery = true)
 	Page<Role> findByIncludingOpportunity(Pageable pageable, org.healthystyle.model.role.opportunity.Name name);
 
 }

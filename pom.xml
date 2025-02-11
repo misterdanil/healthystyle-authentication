@@ -14,5 +14,6 @@
 	<modules>
 		<module>authentication-model</module>
 		<module>authentication-repository</module>
+		<module>authentication-service</module>
 	</modules>
 </project>

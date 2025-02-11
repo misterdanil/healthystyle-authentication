@@ -26,6 +26,8 @@ public class ConfirmCode {
 	private Long id;
 	@Column(nullable = false, unique = true, columnDefinition = "VARCHAR(6) CONSTRAINT CK_valid_confirm_code_token CHECK (token ~ '\\d{6}')")
 	private String token;
+	@Column(name = "is_confirmed", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
+	private Boolean isConfirmed;
 	@ManyToOne
 	@JoinColumn(name = "algorithm_id", nullable = false)
 	private Algorithm algorithm;
@@ -56,6 +58,14 @@ public class ConfirmCode {
 
 	public String getToken() {
 		return token;
+	}
+
+	public Boolean isConfirmed() {
+		return isConfirmed;
+	}
+
+	public void setConfirmed(Boolean isConfirmed) {
+		this.isConfirmed = isConfirmed;
 	}
 
 	public Algorithm getAlgorithm() {

@@ -28,7 +28,7 @@ public class RefreshToken {
 	@Column(nullable = false, length = 256)
 	private String token;
 	@ManyToOne
-	@JoinColumn(name = "algorithm_id", nullable = false)
+	@JoinColumn(name = "algorithm_id")
 	private Algorithm algorithm;
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "issued_at", nullable = false)
@@ -40,17 +40,15 @@ public class RefreshToken {
 	@JoinColumn(name = "user_id", nullable = false)
 	private User user;
 
-	public RefreshToken(String token, Algorithm algorithm, Instant issuedAt, Instant expiredAt, User user) {
+	public RefreshToken(String token, Instant issuedAt, Instant expiredAt, User user) {
 		super();
 
 		Objects.requireNonNull(token, "Token must be not null");
-		Objects.requireNonNull(algorithm, "Algorithm must be not null");
 		Objects.requireNonNull(issuedAt, "Issued at must be not null");
 		Objects.requireNonNull(expiredAt, "Expired at must be not null");
 		Objects.requireNonNull(user, "User must be not null");
 
 		this.token = token;
-		this.algorithm = algorithm;
 		this.issuedAt = issuedAt;
 		this.expiredAt = expiredAt;
 		this.user = user;
