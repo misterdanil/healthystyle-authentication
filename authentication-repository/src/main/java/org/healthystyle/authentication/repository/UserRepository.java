@@ -3,7 +3,7 @@ package org.healthystyle.authentication.repository;
 import java.util.List;
 
 import org.healthystyle.model.User;
-import org.healthystyle.model.role.Role;
+import org.healthystyle.model.role.Name;
 import org.healthystyle.model.sex.Type;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -54,6 +54,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
 	@Query("SELECT EXISTS (SELECT ur FROM User u INNER JOIN u.roles ur WHERE u.id = :userId AND ur.id = :roleId)")
 	boolean hasRole(Long userId, Long roleId);
+
+	@Query("SELECT EXISTS (SELECT ur FROM User u INNER JOIN u.roles ur WHERE u.id = :userId AND ur.name = :roleName)")
+	boolean hasRole(Long userId, Name roleName);
 
 	@Query("SELECT EXISTS (SELECT u FROM User u WHERE u.username = :username)")
 	boolean existsByUsername(String username);

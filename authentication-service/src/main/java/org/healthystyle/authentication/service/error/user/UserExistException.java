@@ -1,6 +1,7 @@
 package org.healthystyle.authentication.service.error.user;
 
 import org.healthystyle.authentication.service.error.AbstractException;
+import org.healthystyle.authentication.service.error.Field;
 import org.springframework.validation.BindingResult;
 
 public class UserExistException extends AbstractException {

@@ -29,6 +29,10 @@ public interface ConfirmCodeRepository extends JpaRepository<ConfirmCode, Long> 
 	@Query("DELETE FROM ConfirmCode cc INNER JOIN User u ON u.id = cc.user.id WHERE u.id = :id")
 	void deleteByUser(Long userId);
 
+	@Modifying
+	@Query("DELETE FROM ConfirmCode cc WHERE cc.isConfirmed = FALSE AND cc.expiredAt < CURRENT_TIMESTAMP")
+	void deleteExpiredAndNotConfirmed();
+
 	@Query("SELECT EXISTS (SELECT cc FROM ConfirmCode cc WHERE cc.token = :token)")
 	boolean existsByToken(String token);
 }

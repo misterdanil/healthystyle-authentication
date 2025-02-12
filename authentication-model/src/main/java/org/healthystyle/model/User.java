@@ -193,6 +193,10 @@ public class User {
 		this.regionId = regionId;
 	}
 
+	public void setConfidentiality(Confidentiality confidentiality) {
+		this.confidentiality = confidentiality;
+	}
+
 	public Confidentiality getConfidentiality() {
 		return confidentiality;
 	}

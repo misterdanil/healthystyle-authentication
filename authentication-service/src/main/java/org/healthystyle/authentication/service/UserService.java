@@ -9,6 +9,7 @@ import org.healthystyle.authentication.service.error.user.UserNotFoundException;
 import org.healthystyle.authentication.service.error.user.UserOldException;
 import org.healthystyle.authentication.service.error.user.UserYoungException;
 import org.healthystyle.model.User;
+import org.healthystyle.model.role.Name;
 import org.healthystyle.model.sex.Type;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
@@ -44,8 +45,10 @@ public interface UserService {
 	// ORDER BY u.removedOn DESC")
 //	Page<User> findRemoved(String name, Pageable pageable);
 
-
 	boolean hasRole(long userId, long roleId);
 
-	User save(UserSaveRequest saveRequest) throws ValidationException, UserExistException, UserYoungException, UserOldException;
+	boolean hasRole(long userId, Name roleName);
+
+	User save(UserSaveRequest saveRequest)
+			throws ValidationException, UserExistException, UserYoungException, UserOldException;
 }

@@ -5,11 +5,14 @@ import java.time.Year;
 import java.time.temporal.ChronoUnit;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Optional;
 
 import org.healthystyle.authentication.repository.UserRepository;
 import org.healthystyle.authentication.service.UserService;
+import org.healthystyle.authentication.service.confidentiality.ConfidentialityService;
 import org.healthystyle.authentication.service.dto.UserSaveRequest;
 import org.healthystyle.authentication.service.error.ValidationException;
+import org.healthystyle.authentication.service.error.code.UserIdField;
 import org.healthystyle.authentication.service.error.user.EmailField;
 import org.healthystyle.authentication.service.error.user.TelephoneNumberField;
 import org.healthystyle.authentication.service.error.user.UserExistException;
@@ -19,8 +22,10 @@ import org.healthystyle.authentication.service.error.user.UserYoungException;
 import org.healthystyle.authentication.service.error.user.UsernameField;
 import org.healthystyle.authentication.service.log.LogTemplate;
 import org.healthystyle.authentication.service.role.RoleService;
+import org.healthystyle.authentication.service.security.code.ConfirmCodeService;
 import org.healthystyle.authentication.service.validation.ParamsChecker;
 import org.healthystyle.model.User;
+import org.healthystyle.model.confidentiality.Confidentiality;
 import org.healthystyle.model.role.Name;
 import org.healthystyle.model.role.Role;
 import org.healthystyle.model.security.code.ConfirmCode;
@@ -49,6 +54,10 @@ public class UserServiceImpl implements UserService {
 	private PasswordEncoder passwordEncoder;
 	@Autowired
 	private RoleService roleService;
+	@Autowired
+	private ConfirmCodeService codeService;
+	@Autowired
+	private ConfidentialityService confidentialityService;
 	public static final Integer MAX_SIZE = 50;
 
 	private static final Integer MIN_AGE = 18;
@@ -58,8 +67,17 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public User findById(long id) throws UserNotFoundException {
-		LOG.debug("Start fetching user by id: {}", id);
-		return null;
+		LOG.debug("Fetching a user by id: {}", id);
+		Optional<User> user = userRepository.findById(id);
+		if (user.isEmpty()) {
+			LOG.warn("There is no the user with id '{}'", id);
+			BindingResult result = new MapBindingResult(new LinkedHashMap<>(), "user");
+			result.reject("user.find.id.notExist", "Пользователя с таким идентификатором не существует");
+			throw new UserNotFoundException(new UserIdField(id), result);
+		}
+
+		LOG.info("Found user by id '{}'", id);
+		return user.get();
 	}
 
 	@Override
@@ -220,6 +238,14 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
+	public boolean hasRole(long userId, Name roleName) {
+		LOG.debug("Checking if user with role exists by user id '{}' and role name '{}'", userId, roleName);
+		boolean hasRole = userRepository.hasRole(userId, roleName);
+		LOG.info("Got info about belonging role '{}' to user '{}': {}", roleName, userId, hasRole);
+		return hasRole;
+	}
+
+	@Override
 	public User save(UserSaveRequest saveRequest)
 			throws ValidationException, UserExistException, UserYoungException, UserOldException {
 		LOG.debug("Start saving a user: {}", saveRequest);
@@ -271,17 +297,20 @@ public class UserServiceImpl implements UserService {
 		String password = saveRequest.getPassword();
 		LOG.debug("Encrypting the password");
 		password = passwordEncoder.encode(password);
-		
+
 		LOG.debug("Creating the user: {}", saveRequest);
 		Role role = roleService.findByName(Name.USER);
 		User user = new User(username, email, password, role);
+
+		ConfirmCode code = codeService.save(user);
+		user.setConfirmCode(code);
+
+		Confidentiality confidentiality = confidentialityService.save(user);
+		user.setConfidentiality(confidentiality);
+
 		userRepository.save(user);
-		
-		LOG.debug("Creating confirm code");
-		ConfirmCode code = confirmC
 
-		return null;
-
+		return user;
 	}
 
 	public static void main(String[] args) {

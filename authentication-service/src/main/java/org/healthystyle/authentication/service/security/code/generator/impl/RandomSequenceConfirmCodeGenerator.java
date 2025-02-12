@@ -4,16 +4,16 @@ import java.util.Random;
 
 import org.healthystyle.authentication.service.security.code.generator.ConfirmCodeGenerator;
 import org.healthystyle.model.User;
+import org.healthystyle.model.security.code.Algorithm;
 import org.healthystyle.model.security.code.Type;
 import org.springframework.stereotype.Component;
 
 @Component
-public class RandomSequenceConfirmCodeGenerator implements ConfirmCodeGenerator {
+public class RandomSequenceConfirmCodeGenerator extends ConfirmCodeGenerator {
 	private static final int MAX_SIZE = 6;
 
-	@Override
-	public boolean support(Type type) {
-		return type != null && type.equals(Type.RANDOM_SEQUENCE);
+	public RandomSequenceConfirmCodeGenerator(Algorithm algorithm) {
+		super(algorithm);
 	}
 
 	@Override

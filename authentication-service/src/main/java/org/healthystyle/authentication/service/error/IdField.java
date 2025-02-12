@@ -1,4 +1,4 @@
-package org.healthystyle.authentication.service.error.user;
+package org.healthystyle.authentication.service.error;
 
 public class IdField extends Field<Long> {
 

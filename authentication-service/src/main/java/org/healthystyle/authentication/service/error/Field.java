@@ -1,6 +1,6 @@
-package org.healthystyle.authentication.service.error.user;
+package org.healthystyle.authentication.service.error;
 
-abstract class Field<T> {
+public abstract class Field<T> {
 	private String name;
 	private T value;
 
