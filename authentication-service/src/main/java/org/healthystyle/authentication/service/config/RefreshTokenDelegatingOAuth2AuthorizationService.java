@@ -10,7 +10,7 @@ import org.springframework.security.oauth2.server.authorization.OAuth2Authorizat
 import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
 import org.springframework.stereotype.Service;
 
-@Service
+//@Service
 // OAuth2AuthorizationService must save refresh token to DB but default realization (memory) saves everything in memory
 public class RefreshTokenDelegatingOAuth2AuthorizationService implements OAuth2AuthorizationService {
 	@Autowired
@@ -49,6 +49,8 @@ public class RefreshTokenDelegatingOAuth2AuthorizationService implements OAuth2A
 		if (authorization == null && tokenType.equals(OAuth2TokenType.REFRESH_TOKEN)) {
 			OAuth2Authorization.withRegisteredClient(null).build();
 		}
+		
+		return null;
 	}
 
 }

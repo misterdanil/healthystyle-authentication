@@ -15,7 +15,7 @@ public class ParamsChecker {
 	public static void checkPageNumber(int pageNumber, BindingResult result) {
 		LOG.debug("Checking page number");
 
-		if (pageNumber < 1) {
+		if (pageNumber < 0) {
 			LOG.warn("Page number is zero or negative: {}", pageNumber);
 			result.reject("*.*.pageNumber.zero_or_negative", "Номер страницы должен быть больше нуля");
 		}

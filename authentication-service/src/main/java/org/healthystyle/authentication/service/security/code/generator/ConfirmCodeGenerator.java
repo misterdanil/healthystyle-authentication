@@ -6,6 +6,11 @@ import org.healthystyle.model.security.code.Algorithm;
 public abstract class ConfirmCodeGenerator {
 	private Algorithm algorithm;
 
+	public ConfirmCodeGenerator() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+
 	public ConfirmCodeGenerator(Algorithm algorithm) {
 		this.algorithm = algorithm;
 	}

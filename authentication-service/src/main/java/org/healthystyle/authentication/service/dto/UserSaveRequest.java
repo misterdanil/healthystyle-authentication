@@ -18,7 +18,7 @@ public class UserSaveRequest {
 	@NotEmpty
 	@Pattern(regexp = UserRegexp.PASSWORD, message = "Пароль должен содержать как минимум один большой и маленький символы, цифру и специальный символ @$!%*?&_")
 	private String password;
-	@Past(message = "Дата рождения должна быть прошлого времени")
+//	@Past(message = "Дата рождения должна быть прошлого времени")
 	private LocalDate birthDate;
 
 	public String getUsername() {

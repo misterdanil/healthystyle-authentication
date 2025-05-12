@@ -15,6 +15,7 @@ import org.healthystyle.model.sex.Sex;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -35,17 +36,29 @@ public class User {
 	@SequenceGenerator(name = "user_id_generator", sequenceName = "user_sequence", initialValue = 1, allocationSize = 20)
 	@GeneratedValue(generator = "user_id_generator", strategy = GenerationType.SEQUENCE)
 	private Long id;
-	@Column(nullable = false, columnDefinition = "VARCHAR(50) CONSTRAINT CK_valid_username CHECK (~ '\\w{3,}')")
+	@Column(nullable = false, columnDefinition = "VARCHAR(50) CONSTRAINT CK_valid_username CHECK (username ~ '\\w{3,}')")
 	private String username;
-	@Column(name = "first_name", columnDefinition = "VARCHAR(100) CONSTRAINT CK_valid_first_name CHECK (first_name ~ '^\\p{L}{2}[\\p{L} ,.'-]{0,98}$')")
+	@Column(name = "first_name" /*columnDefinition = "VARCHAR(100) CONSTRAINT CK_valid_first_name CHECK (first_name ~ '^\\p{L}{2}[\\p{L} ,.'-]{0,98}$')"*/)
 	private String firstName;
-	@Column(name = "last_name", columnDefinition = "VARCHAR(100) CONSTRAINT CK_valid_last_name CHECK (last_name ~ '^\\p{L}{2}[\\p{L} ,.'-]{0,98}$')")
+	@Column(name = "last_name"/*
+								 * , columnDefinition =
+								 * "VARCHAR(100) CONSTRAINT CK_valid_last_name CHECK (last_name ~ '^\\p{L}{2}[\\p{L} ,.'-]{0,98}$')"
+								 */)
 	private String lastName;
-	@Column(name = "telephone_number", columnDefinition = "VARCHAR(15) CONSTRAINT CK_valid_telephone_number CHECK (telephone_number ~ '^\\+?[0-9]{5,15}$')")
+	@Column(name = "telephone_number"/*
+										 * , columnDefinition =
+										 * "VARCHAR(15) CONSTRAINT CK_valid_telephone_number CHECK (telephone_number ~ '^\\+?[0-9]{5,15}$')"
+										 */)
 	private String telephoneNumber;
-	@Column(nullable = false, columnDefinition = "VARCHAR(320) CONSTRAINT CK_valid_email CHECK (email ~ '^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$')")
+	@Column(nullable = false/*
+							 * , columnDefinition =
+							 * "VARCHAR(320) CONSTRAINT CK_valid_email CHECK (email ~ '^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$')"
+							 */)
 	private String email;
-	@Column(nullable = false, columnDefinition = "VARCHAR(100) CONSTRAINT CK_valid_password CHECK (password ~ '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&_])[A-Za-z\\d@$!%*?&_]{8,}$')")
+	@Column(nullable = false/*
+							 * , columnDefinition =
+							 * "VARCHAR(100) CONSTRAINT CK_valid_password CHECK (password ~ '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&_])[A-Za-z\\d@$!%*?&_]{8,}$')"
+							 */)
 	private String password;
 	@Temporal(TemporalType.DATE)
 	@Column(columnDefinition = "DATE CONSTRAINT CK_min_age CHECK (date_part('year', age(birthdate)) > 18)")
@@ -53,13 +66,13 @@ public class User {
 	@ManyToOne
 	@JoinColumn(name = "sex_id")
 	private Sex sex;
-	@ManyToMany
+	@ManyToMany(fetch = FetchType.EAGER)
 	@JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id", nullable = false), inverseJoinColumns = @JoinColumn(name = "role_id", nullable = false))
 	private List<Role> roles;
 	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
 	private ConfirmCode confirmCode;
-	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-	private RefreshToken refreshToken;
+//	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+//	private RefreshToken refreshToken;
 	@Column(name = "image_id")
 	private Long imageId;
 	@Column(name = "region_id")
@@ -68,10 +81,11 @@ public class User {
 	private Confidentiality confidentiality;
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "created_on", nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
-	private Instant createdOn;
-	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "removed_on", nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
-	private Instant removedOn;
+	private Instant createdOn = Instant.now();
+
+	public User() {
+		super();
+	}
 
 	public User(String username, String email, String password, Role... roles) {
 		super();
@@ -169,13 +183,13 @@ public class User {
 		this.confirmCode = confirmCode;
 	}
 
-	public RefreshToken getRefreshToken() {
-		return refreshToken;
-	}
-
-	public void setRefreshToken(RefreshToken refreshToken) {
-		this.refreshToken = refreshToken;
-	}
+//	public RefreshToken getRefreshToken() {
+//		return refreshToken;
+//	}
+//
+//	public void setRefreshToken(RefreshToken refreshToken) {
+//		this.refreshToken = refreshToken;
+//	}
 
 	public Long getImageId() {
 		return imageId;
@@ -204,13 +218,4 @@ public class User {
 	public Instant getCreatedOn() {
 		return createdOn;
 	}
-
-	public Instant getRemovedOn() {
-		return removedOn;
-	}
-
-	public void setRemovedOn(Instant removedOn) {
-		this.removedOn = removedOn;
-	}
-
 }

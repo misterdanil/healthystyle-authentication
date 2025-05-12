@@ -5,6 +5,4 @@ import org.healthystyle.model.role.Role;
 
 public interface RoleService {
 	Role findByName(Name name);
-	
-	Role save(Role role);
 }

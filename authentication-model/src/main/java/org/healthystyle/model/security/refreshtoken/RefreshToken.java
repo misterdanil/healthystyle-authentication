@@ -18,8 +18,8 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 
-@Entity
-@Table(name = "refresh_token")
+//@Entity
+//@Table(name = "refresh_token")
 public class RefreshToken {
 	@Id
 	@SequenceGenerator(name = "refresh_token_id_generator", sequenceName = "refresh_token_sequence", initialValue = 1, allocationSize = 20)
@@ -36,7 +36,7 @@ public class RefreshToken {
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "expired_at", nullable = false)
 	private Instant expiredAt;
-	@OneToOne(mappedBy = "refreshToken")
+	@OneToOne
 	@JoinColumn(name = "user_id", nullable = false)
 	private User user;
 

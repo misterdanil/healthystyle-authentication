@@ -12,8 +12,8 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-@Repository
-public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long> {
+//@Repository
+public interface RefreshTokenRepository /* extends JpaRepository<RefreshToken, Long> */ {
 	@Query("SELECT t FROM Token t WHERE t.token = :token")
 	RefreshToken findByToken(String token);
 

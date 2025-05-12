@@ -12,6 +12,7 @@ import org.healthystyle.model.confidentiality.accessability.ModeratorBannedAcces
 import org.healthystyle.model.confidentiality.accessability.ModeratorWarnedAccessability;
 import org.healthystyle.model.confidentiality.accessability.RealNameViewAccessability;
 import org.healthystyle.model.confidentiality.accessability.SearchOutputAccessability;
+import org.healthystyle.model.confidentiality.accessability.type.ViewAccessabilityType;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -37,19 +38,19 @@ public class Confidentiality {
 	@JoinColumn(name = "user_id", nullable = false)
 	private User user;
 	@ManyToOne
-	@JoinColumn(name = "real_name_view_accessability_id", nullable = false)
+	@JoinColumn(name = "real_name_view_accessability_id"/* , nullable = false */)
 	private RealNameViewAccessability realNameViewAccessability;
 	@ManyToOne
-	@JoinColumn(name = "contact_view_accessability_id", nullable = false)
+	@JoinColumn(name = "contact_view_accessability_id"/* , nullable = false */)
 	private ContactViewAccessability contactViewAccessability;
 	@ManyToOne
-	@JoinColumn(name = "contact_part_accessability_id", nullable = false)
+	@JoinColumn(name = "contact_part_accessability_id"/* , nullable = false */)
 	private ContactPartAccessability contactPartAccessability;
 	@ManyToOne
-	@JoinColumn(name = "birthdate_view_accessability_id", nullable = false)
+	@JoinColumn(name = "birthdate_view_accessability_id"/* , nullable = false */)
 	private BirthdateViewAccessability birthdateViewAccessability;
 	@ManyToOne
-	@JoinColumn(name = "birthdate_part_accessability_id", nullable = false)
+	@JoinColumn(name = "birthdate_part_accessability_id"/* , nullable = false */)
 	private BirthdatePartAccessability birthdatePartAccessability;
 	@ManyToOne
 	@JoinColumn(name = "moderator_banned_accessability_id")
@@ -58,14 +59,18 @@ public class Confidentiality {
 	@JoinColumn(name = "moderator_warned_accessability_id")
 	private ModeratorWarnedAccessability moderatorWarnedAccessability;
 	@ManyToOne
-	@JoinColumn(name = "search_output_accessability_id", nullable = false)
+	@JoinColumn(name = "search_output_accessability_id"/* , nullable = false */)
 	private SearchOutputAccessability searchOutputAccessability;
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "created_on", nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
-	private Instant createdOn;
+	private Instant createdOn = Instant.now();
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "removed_on")
 	private Instant removedOn;
+
+	public Confidentiality() {
+		super();
+	}
 
 	public Confidentiality(User user) {
 		super();

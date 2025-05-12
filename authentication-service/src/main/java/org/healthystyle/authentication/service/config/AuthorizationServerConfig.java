@@ -5,9 +5,10 @@ import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
-import java.time.Duration;
+import java.util.Arrays;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
@@ -15,19 +16,19 @@ import org.springframework.core.annotation.Order;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.oauth2.core.AuthorizationGrantType;
-import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.server.authorization.JdbcOAuth2AuthorizationService;
-import org.springframework.security.oauth2.server.authorization.OAuth2Authorization;
-import org.springframework.security.oauth2.server.authorization.client.InMemoryRegisteredClientRepository;
-import org.springframework.security.oauth2.server.authorization.client.JdbcRegisteredClientRepository;
-import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
-import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
+import org.springframework.security.web.DefaultSecurityFilterChain;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.jwk.JWKSet;
@@ -37,47 +38,46 @@ import com.nimbusds.jose.proc.SecurityContext;
 
 @Configuration
 public class AuthorizationServerConfig {
+//	@Autowired
+//	private UserDetailsService userDetailsService;
+
 	@Bean
 	@Order(value = Ordered.HIGHEST_PRECEDENCE)
 	public SecurityFilterChain authorizationServerFilterChain(HttpSecurity httpSecurity) throws Exception {
-		OAuth2AuthorizationServerConfigurer oauth2AuthorizationServerConfigurer = OAuth2AuthorizationServerConfigurer
-				.authorizationServer();
-		httpSecurity.securityMatcher(oauth2AuthorizationServerConfigurer.getEndpointsMatcher())
-				.with(oauth2AuthorizationServerConfigurer, (authorizationServer) -> {
-					authorizationServer.oidc(Customizer.withDefaults()).
-				});
-		OAuth2Authorization.from(null).invalidate(null).build().getRefreshToken().is
-		return httpSecurity.build();
+//		OAuth2AuthorizationServerConfigurer oauth2AuthorizationServerConfigurer = OAuth2AuthorizationServerConfigurer
+//				.authorizationServer();
+//		httpSecurity.securityMatcher(oauth2AuthorizationServerConfigurer.getEndpointsMatcher());
+////				.with(oauth2AuthorizationServerConfigurer, (authorizationServer) -> {
+////					authorizationServer.oidc(Customizer.withDefaults())
+////				});
+////		OAuth2Authorization.from(null).invalidate(null).build().getRefreshToken().is
+//		return httpSecurity.build();
+		OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(httpSecurity);
+
+		httpSecurity.getConfigurer(OAuth2AuthorizationServerConfigurer.class).oidc(Customizer.withDefaults());
+		httpSecurity.csrf(csrf -> csrf.disable())/* .userDetailsService(userDetailsService) */;
+		DefaultSecurityFilterChain ch = httpSecurity.cors(c -> c.configurationSource(corsConfigurationSource2()))
+				.formLogin(Customizer.withDefaults())
+				.exceptionHandling(eh -> eh.defaultAuthenticationEntryPointFor(
+						new LoginUrlAuthenticationEntryPoint("/loginPage"),
+						new AntPathRequestMatcher("/**")))
+
+				.build();
+		return ch;
 	}
 
 	@Bean
-	public InMemoryRegisteredClientRepository registeredClientRepository() {
-		RegisteredClient healthClient = RegisteredClient.withId(UUID.randomUUID().toString()).clientId("health")
-				.clientSecret("{noop}123456789")
-				.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
-				.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-				.authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN).redirectUri("http://localhost:8081/code")
-				.tokenSettings(TokenSettings.builder().authorizationCodeTimeToLive(Duration.ofMinutes(5))
-						.accessTokenTimeToLive(Duration.ofMinutes(30)).refreshTokenTimeToLive(Duration.ofDays(30))
-						.reuseRefreshTokens(false).build())
-				.build();
+	public CorsConfigurationSource corsConfigurationSource2() {
+		CorsConfiguration configuration = new CorsConfiguration();
 
-		return new InMemoryRegisteredClientRepository(healthClient);
-	}
+		configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://localhost:3002"));
+		configuration.setAllowedHeaders(Arrays.asList("*"));
+		configuration.setAllowedMethods(Arrays.asList("*"));
+		configuration.setAllowCredentials(true);
 
-	@Bean
-	public JdbcRegisteredClientRepository jdbcRegisteredClientRepository(JdbcOperations operations) {
-		RegisteredClient healthClient = RegisteredClient.withId(UUID.randomUUID().toString()).clientId("health")
-				.clientSecret("{noop}123456789")
-				.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
-				.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-				.authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN).redirectUri("http://localhost:8081/code")
-				.tokenSettings(TokenSettings.builder().authorizationCodeTimeToLive(Duration.ofMinutes(5))
-						.accessTokenTimeToLive(Duration.ofMinutes(30)).refreshTokenTimeToLive(Duration.ofDays(30))
-						.reuseRefreshTokens(false).build())
-				.build();
-
-		return new JdbcRegisteredClientRepository(operations);
+		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+		source.registerCorsConfiguration("/**", configuration);
+		return source;
 	}
 
 	@Bean

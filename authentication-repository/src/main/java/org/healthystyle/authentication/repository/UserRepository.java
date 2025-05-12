@@ -14,13 +14,14 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
-	Page<User> findByIds(List<Long> ids);
+	@Query("SELECT u FROM User u WHERE u.id IN :ids")
+	Page<User> findByIds(List<Long> ids, Pageable pageable);
 
-	@Query("SELECT u FROM User u WHERE LOWER(u.username) LIKE LOWER(':username%')")
+	@Query("SELECT u FROM User u WHERE u.username = :username")
 	User findByUsername(String username);
 
-	@Query("SELECT u FROM User u WHERE LOWER(CONCAT(u.firstName, ' ', u.lastName)) LIKE LOWER(%:name%) OR LOWER(u.username) LIKE LOWER(%:name%)")
-	Page<User> findByUsernameAndName(String name, Pageable pageable, Sort sort);
+	@Query("SELECT u FROM User u WHERE LOWER(CONCAT(u.firstName, ' ', u.lastName)) LIKE CONCAT('%', LOWER(:name), '%') OR LOWER(u.username) LIKE CONCAT('%', LOWER(:name), '%')")
+	Page<User> findByUsernameAndName(String name, Pageable pageable);
 
 	@Query("SELECT u FROM User u WHERE u.telephoneNumber LIKE '%:telephoneNumber%'")
 	User findByTelephoneNumber(String telephoneNumber);
@@ -28,20 +29,20 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	@Query("SELECT u FROM User u WHERE u.email LIKE '%:email%'")
 	User findByEmail(String email);
 
-	@Query("SELECT u FROM User u INNER JOIN Sex s ON u.sex = s WHERE "
-			+ "(:name IS NULL OR (LOWER(CONCAT(u.firstName, ' ', u.lastName)) LIKE LOWER(%:name%))) "
-			+ "AND (:birthYear IS NULL OR :birthYear = date_part('year', u.birthDate) AND (:sex IS NULL OR s.type = :type) AND (:regionId IS NULL OR u.regionId = :regionId)")
-	Page<User> findByNameAndBirthYearAndSexAndRegionId(String name, Integer birthYear, Type sex, Long regionId,
-			Pageable pageable);
+//	@Query("SELECT u FROM User u INNER JOIN Sex s ON u.sex = s WHERE "
+//			+ "(:name IS NULL OR (LOWER(CONCAT(u.firstName, ' ', u.lastName)) LIKE LOWER(%:name%))) "
+//			+ "AND (:birthYear IS NULL OR :birthYear = date_part('year', u.birthDate) AND (:sex IS NULL OR s.type = :type) AND (:regionId IS NULL OR u.regionId = :regionId)")
+//	Page<User> findByNameAndBirthYearAndSexAndRegionId(String name, Integer birthYear, Type sex, Long regionId,
+//			Pageable pageable);
 
-	@Query("SELECT u FROM User u INNER JOIN u.roles r ON WHERE (:name IS NULL OR (LOWER(CONCAT(u.firstName, ' ', u.lastName)) LIKE LOWER(%:name%))) AND (:roleId IS NULL OR r.id = :roleId)")
-	Page<User> findByNameAndRole(String name, Long roleId, Pageable pageable);
+//	@Query("SELECT u FROM User u INNER JOIN u.roles r ON WHERE (:name IS NULL OR (LOWER(CONCAT(u.firstName, ' ', u.lastName)) LIKE LOWER(%:name%))) AND (:roleId IS NULL OR r.id = :roleId)")
+//	Page<User> findByNameAndRole(String name, Long roleId, Pageable pageable);
 
-	@Query("SELECT u FROM User u INNER JOIN RefreshToken rt ON rt.user = u WHERE rt.id = :refreshTokenId")
-	User findByRefreshToken(Long refreshTokenId);
+//	@Query("SELECT u FROM User u INNER JOIN RefreshToken rt ON rt.user = u WHERE rt.id = :refreshTokenId")
+//	User findByRefreshToken(Long refreshTokenId);
 
-	@Query("SELECT u FROM User u INNER JOIN RefreshToken rt ON rt.user = u WHERE rt.token = :token")
-	User findByRefreshToken(String token);
+//	@Query("SELECT u FROM User u INNER JOIN RefreshToken rt ON rt.user = u WHERE rt.token = :token")
+//	User findByRefreshToken(String token);
 
 	// service findBYUsernameAndName with sort
 //	Page<User> findLastCreated(String name, Pageable pageable);

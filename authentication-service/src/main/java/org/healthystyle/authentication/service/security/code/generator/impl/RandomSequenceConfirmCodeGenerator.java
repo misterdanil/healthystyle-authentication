@@ -12,6 +12,10 @@ import org.springframework.stereotype.Component;
 public class RandomSequenceConfirmCodeGenerator extends ConfirmCodeGenerator {
 	private static final int MAX_SIZE = 6;
 
+	public RandomSequenceConfirmCodeGenerator() {
+		super();
+	}
+
 	public RandomSequenceConfirmCodeGenerator(Algorithm algorithm) {
 		super(algorithm);
 	}

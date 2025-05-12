@@ -40,9 +40,13 @@ public class Role {
 	private Role parent;
 	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "parent", fetch = FetchType.LAZY)
 	private List<Role> childRoles;
-	@ManyToMany(cascade = CascadeType.ALL)
+	@ManyToMany(fetch = FetchType.EAGER)
 	@JoinTable(name = "role_opportunity", joinColumns = @JoinColumn(name = "role_id", nullable = false), inverseJoinColumns = @JoinColumn(name = "opportunity_id", nullable = false))
 	private List<Opportunity> opportunities;
+
+	public Role() {
+		super();
+	}
 
 	public Role(Name name, Opportunity... opportunities) {
 		super();

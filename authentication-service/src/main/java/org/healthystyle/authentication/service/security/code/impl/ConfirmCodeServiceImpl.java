@@ -25,13 +25,18 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.scheduling.annotation.Schedules;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.MapBindingResult;
+
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 
 @Service
 @PropertySource(value = "classpath:/confirm_code.properties")
@@ -44,6 +49,8 @@ public class ConfirmCodeServiceImpl implements ConfirmCodeService {
 	private Environment env;
 	@Autowired
 	private UserService userService;
+	@Autowired
+	private JavaMailSender mailSender;
 	private final long EXPIRES_MILLIS = 300000L;
 
 	private static final int MAX_SIZE = 50;
@@ -153,6 +160,21 @@ public class ConfirmCodeServiceImpl implements ConfirmCodeService {
 		ConfirmCode code = generate(user);
 
 		code = save(code);
+		
+		MimeMessage message = mailSender.createMimeMessage();
+
+		MimeMessageHelper helper = new MimeMessageHelper(message, "UTF-8");
+
+		try {
+			helper.setTo(code.getUser().getEmail());
+			helper.setFrom("jon_working@mail.ru");
+			helper.setText("Код подтверждения: " + code.getToken());
+			helper.setSubject("Активация");
+		} catch (MessagingException e) {
+			throw new RuntimeException("Could not send message to email: " + code.getUser().getEmail(), e);
+		}
+
+		mailSender.send(message);
 
 		return code;
 	}
@@ -175,6 +197,7 @@ public class ConfirmCodeServiceImpl implements ConfirmCodeService {
 	}
 
 	@Override
+	@Transactional
 	public ConfirmCode save() {
 		Long userId = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
 		User user;

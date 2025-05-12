@@ -35,6 +35,10 @@ public class RealNameViewAccessability {
 	@Column(name = "removed_on")
 	private Instant removedOn;
 
+	public RealNameViewAccessability() {
+		super();
+	}
+
 	public RealNameViewAccessability(ViewAccessabilityType type) {
 		super();
 

@@ -17,20 +17,20 @@ import org.springframework.data.domain.Sort;
 public interface UserService {
 	User findById(long id) throws UserNotFoundException;
 
-	Page<User> findByIds(List<Long> ids);
+	Page<User> findByIds(List<Long> ids, int page, int limit);
 
 	User findByUsername(String username) throws UserNotFoundException;
 
-	Page<User> findByUsernameAndName(String name, int page, int limit, Sort sort) throws ValidationException;
+	Page<User> findByUsernameAndName(String name, int page, int limit) throws ValidationException;
 
 	User findByTelephoneNumber(String telephoneNumber) throws UserNotFoundException;
 
 	User findByEmail(String email) throws UserNotFoundException;
 
-	Page<User> findByNameAndBirthYearAndSexAndRegionId(String name, Integer birthYear, Type sex, Long regionId,
-			int page, int limit) throws ValidationException;
+//	Page<User> findByNameAndBirthYearAndSexAndRegionId(String name, Integer birthYear, Type sex, Long regionId,
+//			int page, int limit) throws ValidationException;
 
-	Page<User> findByNameAndRole(String name, long roleId, int page, int limit) throws ValidationException;
+//	Page<User> findByNameAndRole(String name, long roleId, int page, int limit) throws ValidationException;
 
 //	User findByRefreshToken(Long refreshTokenId);
 

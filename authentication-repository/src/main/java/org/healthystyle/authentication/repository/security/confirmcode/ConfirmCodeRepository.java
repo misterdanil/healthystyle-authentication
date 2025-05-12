@@ -13,7 +13,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ConfirmCodeRepository extends JpaRepository<ConfirmCode, Long> {
-	@Query("SELECT cc FROM ConfirmCode cc INNER JOIN cc.token t WHERE t.token = :token")
+	@Query("SELECT cc FROM ConfirmCode cc WHERE cc.token = :token")
 	ConfirmCode findByToken(String token);
 
 	@Query("SELECT cc FROM ConfirmCode cc INNER JOIN cc.user u WHERE u.id = :id")
@@ -26,7 +26,7 @@ public interface ConfirmCodeRepository extends JpaRepository<ConfirmCode, Long> 
 	Page<ConfirmCode> findByTime(Instant issuedAt, Instant expiredAt, Pageable pageable);
 
 	@Modifying
-	@Query("DELETE FROM ConfirmCode cc INNER JOIN User u ON u.id = cc.user.id WHERE u.id = :id")
+	@Query("DELETE FROM ConfirmCode cc WHERE cc.user.id = :userId")
 	void deleteByUser(Long userId);
 
 	@Modifying

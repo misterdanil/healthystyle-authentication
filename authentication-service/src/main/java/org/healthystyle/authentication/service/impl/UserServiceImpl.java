@@ -1,8 +1,8 @@
 package org.healthystyle.authentication.service.impl;
 
 import java.time.LocalDate;
-import java.time.Year;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
@@ -20,7 +20,6 @@ import org.healthystyle.authentication.service.error.user.UserNotFoundException;
 import org.healthystyle.authentication.service.error.user.UserOldException;
 import org.healthystyle.authentication.service.error.user.UserYoungException;
 import org.healthystyle.authentication.service.error.user.UsernameField;
-import org.healthystyle.authentication.service.log.LogTemplate;
 import org.healthystyle.authentication.service.role.RoleService;
 import org.healthystyle.authentication.service.security.code.ConfirmCodeService;
 import org.healthystyle.authentication.service.validation.ParamsChecker;
@@ -29,7 +28,6 @@ import org.healthystyle.model.confidentiality.Confidentiality;
 import org.healthystyle.model.role.Name;
 import org.healthystyle.model.role.Role;
 import org.healthystyle.model.security.code.ConfirmCode;
-import org.healthystyle.model.sex.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,15 +35,24 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextImpl;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.MapBindingResult;
 import org.springframework.validation.Validator;
 
 @Service
-public class UserServiceImpl implements UserService {
+public class UserServiceImpl implements UserService, UserDetailsService {
 	@Autowired
 	private UserRepository userRepository;
 	@Autowired
@@ -81,14 +88,14 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public Page<User> findByIds(List<Long> ids) {
+	public Page<User> findByIds(List<Long> ids, int page, int limit) {
 		LOG.info("Getting users by ids: {}", ids);
 		if (ids == null || ids.isEmpty()) {
 			LOG.warn("Ids is null or empty");
 			return Page.empty();
 		}
 
-		Page<User> users = userRepository.findByIds(ids);
+		Page<User> users = userRepository.findByIds(ids, PageRequest.of(page, limit));
 		LOG.info("Got users by ids: {}", ids);
 		return users;
 	}
@@ -110,7 +117,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public Page<User> findByUsernameAndName(String name, int page, int limit, Sort sort) throws ValidationException {
+	public Page<User> findByUsernameAndName(String name, int page, int limit) throws ValidationException {
 		LOG.debug("Start fetching users by name '{}'", name);
 
 		BindingResult result = new MapBindingResult(new LinkedHashMap<String, String>(), "user");
@@ -123,8 +130,8 @@ public class UserServiceImpl implements UserService {
 
 		LOG.debug("The data are OK");
 
-		Page<User> users = userRepository.findByUsernameAndName(name, PageRequest.of(page, limit),
-				Sort.by(Direction.ASC, "username"));
+		Page<User> users = userRepository.findByUsernameAndName(name,
+				PageRequest.of(page, limit, Sort.by(Direction.ASC, "username")));
 		LOG.info("Got users by name '{}' with page '{}' and limit '{}'", name, page, limit);
 
 		return users;
@@ -164,70 +171,70 @@ public class UserServiceImpl implements UserService {
 		return user;
 	}
 
-	@Override
-	public Page<User> findByNameAndBirthYearAndSexAndRegionId(String name, Integer birthYear, Type sex, Long regionId,
-			int page, int limit) throws ValidationException {
-		LOG.debug("Start fetching users by name '{}', birth year '{}', sex '{}' and region id '{}'", name, birthYear,
-				sex, regionId);
+//	@Override
+//	public Page<User> findByNameAndBirthYearAndSexAndRegionId(String name, Integer birthYear, Type sex, Long regionId,
+//			int page, int limit) throws ValidationException {
+//		LOG.debug("Start fetching users by name '{}', birth year '{}', sex '{}' and region id '{}'", name, birthYear,
+//				sex, regionId);
+//
+//		BindingResult result = new MapBindingResult(new LinkedHashMap<String, String>(), "user");
+//
+//		ParamsChecker.checkPageNumber(page, result);
+//		ParamsChecker.checkLimit(limit, MAX_SIZE, result);
+//
+//		if (birthYear != null) {
+//			LOG.debug("Validating birth year: {}", birthYear);
+//			int age = Year.now().getValue() - birthYear;
+//			if (age < MIN_AGE) {
+//				LOG.warn("Birth year '{}' is less than min age '{}'", birthYear, MIN_AGE);
+//				result.rejectValue("birthYear", "user.find.birth_year.less_min_age",
+//						"Возраст пользователя меньше " + MIN_AGE);
+//			}
+//			if (age > MAX_AGE) {
+//				LOG.warn("Birth year '{}' is more than max age '{}'", birthYear, MAX_AGE);
+//				result.rejectValue("birthYear", "user.find.birth_year.more_max_age",
+//						"Возраст пользователя больше " + MAX_AGE);
+//			}
+//		}
+//
+//		if (result.hasErrors()) {
+//			LOG.warn("The passed data have validation errors: {}", result);
+//			throw new ValidationException("The passed data are invalid: %s", result, result);
+//		}
+//
+//		LOG.debug("The passed data are OK: {}", result);
+//		Page<User> users = userRepository.findByNameAndBirthYearAndSexAndRegionId(name, birthYear, sex, regionId,
+//				PageRequest.of(page, limit));
+//
+//		return users;
+//	}
 
-		BindingResult result = new MapBindingResult(new LinkedHashMap<String, String>(), "user");
-
-		ParamsChecker.checkPageNumber(page, result);
-		ParamsChecker.checkLimit(limit, MAX_SIZE, result);
-
-		if (birthYear != null) {
-			LOG.debug("Validating birth year: {}", birthYear);
-			int age = Year.now().getValue() - birthYear;
-			if (age < MIN_AGE) {
-				LOG.warn("Birth year '{}' is less than min age '{}'", birthYear, MIN_AGE);
-				result.rejectValue("birthYear", "user.find.birth_year.less_min_age",
-						"Возраст пользователя меньше " + MIN_AGE);
-			}
-			if (age > MAX_AGE) {
-				LOG.warn("Birth year '{}' is more than max age '{}'", birthYear, MAX_AGE);
-				result.rejectValue("birthYear", "user.find.birth_year.more_max_age",
-						"Возраст пользователя больше " + MAX_AGE);
-			}
-		}
-
-		if (result.hasErrors()) {
-			LOG.warn("The passed data have validation errors: {}", result);
-			throw new ValidationException("The passed data are invalid: %s", result, result);
-		}
-
-		LOG.debug("The passed data are OK: {}", result);
-		Page<User> users = userRepository.findByNameAndBirthYearAndSexAndRegionId(name, birthYear, sex, regionId,
-				PageRequest.of(page, limit));
-
-		return users;
-	}
-
-	@Override
-	public Page<User> findByNameAndRole(String name, long roleId, int page, int limit) throws ValidationException {
-		String[] paramNames = new String[] { "name", "roleId", "page", "limit" };
-
-		String logParams = LogTemplate.getParamsTemplate("{}", paramNames);
-		LOG.debug("Getting users by " + logParams, name, roleId, page, limit);
-
-		BindingResult result = new MapBindingResult(new LinkedHashMap<>(), "user");
-		ParamsChecker.checkPageNumber(page, result);
-		ParamsChecker.checkLimit(limit, MAX_SIZE, result);
-
-		if (result.hasErrors()) {
-			LOG.warn("Passed data have validation errors: {}. Params: " + logParams, result, name, roleId, page, limit);
-			String exceptionParams = LogTemplate.getParamsTemplate("%s", paramNames);
-			throw new ValidationException(
-					"Exception occurred while fetching users. Passed data are invalid: %s. Params: " + exceptionParams,
-					result, name, roleId, page, limit);
-		}
-
-		LOG.debug("Passed data are OK. Params: " + logParams, name, roleId, page, limit);
-
-		Page<User> users = userRepository.findByNameAndRole(name, roleId, PageRequest.of(page, limit));
-		LOG.info("Got users successfully by params: " + logParams, name, roleId, page, limit);
-
-		return users;
-	}
+//	@Override
+//	public Page<User> findByNameAndRole(String name, long roleId, int page, int limit) throws ValidationException {
+//		String[] paramNames = new String[] { "name", "roleId", "page", "limit" };
+//
+//		String logParams = LogTemplate.getParamsTemplate("{}", paramNames);
+//		LOG.debug("Getting users by " + logParams, name, roleId, page, limit);
+//
+//		BindingResult result = new MapBindingResult(new LinkedHashMap<>(), "user");
+//		ParamsChecker.checkPageNumber(page, result);
+//		ParamsChecker.checkLimit(limit, MAX_SIZE, result);
+//
+//		if (result.hasErrors()) {
+//			LOG.warn("Passed data have validation errors: {}. Params: " + logParams, result, name, roleId, page, limit);
+//			String exceptionParams = LogTemplate.getParamsTemplate("%s", paramNames);
+//			throw new ValidationException(
+//					"Exception occurred while fetching users. Passed data are invalid: %s. Params: " + exceptionParams,
+//					result, name, roleId, page, limit);
+//		}
+//
+//		LOG.debug("Passed data are OK. Params: " + logParams, name, roleId, page, limit);
+//
+//		Page<User> users = userRepository.findByNameAndRole(name, roleId, PageRequest.of(page, limit));
+//		LOG.info("Got users successfully by params: " + logParams, name, roleId, page, limit);
+//
+//		return users;
+//	}
 
 	@Override
 	public boolean hasRole(long userId, long roleId) {
@@ -246,6 +253,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
+	@Transactional
 	public User save(UserSaveRequest saveRequest)
 			throws ValidationException, UserExistException, UserYoungException, UserOldException {
 		LOG.debug("Start saving a user: {}", saveRequest);
@@ -277,22 +285,22 @@ public class UserServiceImpl implements UserService {
 			throw new UserExistException(new EmailField(email), result);
 		}
 
-		LocalDate birthDate = saveRequest.getBirthDate();
-		long age = ChronoUnit.YEARS.between(birthDate, LocalDate.now());
-		LOG.debug("Checking for user is older than {}: {}", MIN_AGE, birthDate);
-		if (age < MIN_AGE) {
-			LOG.warn("The user is younger than {}. User: {}", MIN_AGE, saveRequest);
-			result.rejectValue("birthDate", "user.save.birthdate.young",
-					"Пользователи младше " + MIN_AGE + " не допускаются к регистрации на данном ресурсе");
-			throw new UserYoungException((int) age, MIN_AGE, result);
-		}
-
-		LOG.debug("Checking for user is younger than {}: {}", MAX_AGE, birthDate);
-		if (age > MAX_AGE) {
-			LOG.warn("The user is older than {}. User: {}", MAX_AGE, saveRequest);
-			result.rejectValue("birthDate", "user.save.birthdate.old", "Возраст слишком большой");
-			throw new UserOldException((int) age, MAX_AGE, result);
-		}
+//		LocalDate birthDate = saveRequest.getBirthDate();
+//		long age = ChronoUnit.YEARS.between(birthDate, LocalDate.now());
+//		LOG.debug("Checking for user is older than {}: {}", MIN_AGE, birthDate);
+//		if (age < MIN_AGE) {
+//			LOG.warn("The user is younger than {}. User: {}", MIN_AGE, saveRequest);
+//			result.rejectValue("birthDate", "user.save.birthdate.young",
+//					"Пользователи младше " + MIN_AGE + " не допускаются к регистрации на данном ресурсе");
+//			throw new UserYoungException((int) age, MIN_AGE, result);
+//		}
+//
+//		LOG.debug("Checking for user is younger than {}: {}", MAX_AGE, birthDate);
+//		if (age > MAX_AGE) {
+//			LOG.warn("The user is older than {}. User: {}", MAX_AGE, saveRequest);
+//			result.rejectValue("birthDate", "user.save.birthdate.old", "Возраст слишком большой");
+//			throw new UserOldException((int) age, MAX_AGE, result);
+//		}
 
 		String password = saveRequest.getPassword();
 		LOG.debug("Encrypting the password");
@@ -301,6 +309,8 @@ public class UserServiceImpl implements UserService {
 		LOG.debug("Creating the user: {}", saveRequest);
 		Role role = roleService.findByName(Name.USER);
 		User user = new User(username, email, password, role);
+		user.addRoles(role);
+		user = userRepository.save(user);
 
 		ConfirmCode code = codeService.save(user);
 		user.setConfirmCode(code);
@@ -308,9 +318,26 @@ public class UserServiceImpl implements UserService {
 		Confidentiality confidentiality = confidentialityService.save(user);
 		user.setConfidentiality(confidentiality);
 
-		userRepository.save(user);
+		user = userRepository.save(user);
 
 		return user;
+	}
+
+	@Override
+	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+		User user;
+		try {
+			try {
+				Long id = Long.valueOf(username);
+				user = findById(id);
+			} catch (NumberFormatException e) {
+				user = findByUsername(username);
+			}
+		} catch (UserNotFoundException e) {
+			throw new UsernameNotFoundException("Could not found user", e);
+		}
+		return new org.springframework.security.core.userdetails.User(String.valueOf(user.getId()), user.getPassword(),
+				user.getRoles().stream().map(r -> new SimpleGrantedAuthority(r.getName().toString())).toList());
 	}
 
 	public static void main(String[] args) {

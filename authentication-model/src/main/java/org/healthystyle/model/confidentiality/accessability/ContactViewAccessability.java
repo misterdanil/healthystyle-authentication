@@ -21,7 +21,7 @@ import jakarta.persistence.TemporalType;
 @Table(name = "contact_view_accessability")
 public class ContactViewAccessability {
 	@Id
-	@SequenceGenerator(name = "contact_view_accessability_id_generator", sequenceName = "contact_view_accessability", initialValue = 1, allocationSize = 20)
+	@SequenceGenerator(name = "contact_view_accessability_id_generator", sequenceName = "contact_view_accessability_seq", initialValue = 1, allocationSize = 20)
 	@GeneratedValue(generator = "contact_view_accessability_id_generator", strategy = GenerationType.SEQUENCE)
 	private Long id;
 	@Enumerated(EnumType.STRING)
@@ -29,7 +29,7 @@ public class ContactViewAccessability {
 	private ViewAccessabilityType type;
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "created_on", nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
-	private Instant createdOn;
+	private Instant createdOn = Instant.now();
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "removed_on")
 	private Instant removedOn;

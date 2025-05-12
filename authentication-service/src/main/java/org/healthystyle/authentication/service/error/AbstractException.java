@@ -18,7 +18,7 @@ public class AbstractException extends Exception {
 		globalErrors = getGlobalErrorsValues(result.getGlobalErrors());
 		fieldErrors = getFieldErrorsValues(result.getFieldErrors());
 	}
-	
+
 	public AbstractException(BindingResult result) {
 		super();
 		globalErrors = getGlobalErrorsValues(result.getGlobalErrors());
@@ -39,10 +39,17 @@ public class AbstractException extends Exception {
 		return fieldErrorsValues;
 	}
 
+	public List<String> getGlobalErrors() {
+		return globalErrors;
+	}
+
+	public Map<String, String> getFieldErrors() {
+		return fieldErrors;
+	}
+
 	@Override
 	public String getMessage() {
 		return super.getMessage();
 	}
-	
-	
+
 }

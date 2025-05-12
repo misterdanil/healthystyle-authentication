@@ -15,8 +15,8 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 
-@Entity
-@Table
+@Entity(name = "code_algorithm")
+@Table(name = "code_algorithm")
 public class Algorithm {
 	@Id
 	@SequenceGenerator(name = "confirm_code_algorithm_generator", sequenceName = "algorithm_sequence", initialValue = 1, allocationSize = 20)

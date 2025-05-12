@@ -1,5 +1,6 @@
 package org.healthystyle.model.role.opportunity;
 
+import java.time.Instant;
 import java.util.Date;
 
 import org.healthystyle.model.role.Role;
@@ -15,6 +16,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 
 @Entity
 @Table
@@ -26,18 +29,17 @@ public class Opportunity {
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false, unique = true)
 	private Name name;
-	@OneToOne(mappedBy = "opportunities")
-	@JoinColumn(name = "role_id", nullable = false)
-	private Role role;
+	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "created_on", nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
-	private Date createdOn;
-	@Column(name = "removed_on", nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
-	private Date removedOn;
+	private Instant createdOn = Instant.now();
 
-	public Opportunity(Name name, Role role) {
+	public Opportunity() {
+		super();
+	}
+
+	public Opportunity(Name name) {
 		super();
 		this.name = name;
-		this.role = role;
 	}
 
 	public Long getId() {
@@ -52,16 +54,7 @@ public class Opportunity {
 		this.name = name;
 	}
 
-	public Date getCreatedOn() {
+	public Instant getCreatedOn() {
 		return createdOn;
 	}
-
-	public Date getRemovedOn() {
-		return removedOn;
-	}
-
-	public void setRemovedOn(Date removedOn) {
-		this.removedOn = removedOn;
-	}
-
 }

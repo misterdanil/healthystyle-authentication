@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-@Repository
+@Repository("code_algorithm_repository")
 public interface AlgorithmRepository extends JpaRepository<Algorithm, Long> {
 	@Query("SELECT a FROM Algorithm a WHERE a.type = :type")
 	Algorithm findByType(Type type);
