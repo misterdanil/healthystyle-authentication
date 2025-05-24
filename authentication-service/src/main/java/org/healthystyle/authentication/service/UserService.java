@@ -26,6 +26,8 @@ public interface UserService {
 	User findByTelephoneNumber(String telephoneNumber) throws UserNotFoundException;
 
 	User findByEmail(String email) throws UserNotFoundException;
+	
+	String fetchUsernameById(Long id);
 
 //	Page<User> findByNameAndBirthYearAndSexAndRegionId(String name, Integer birthYear, Type sex, Long regionId,
 //			int page, int limit) throws ValidationException;

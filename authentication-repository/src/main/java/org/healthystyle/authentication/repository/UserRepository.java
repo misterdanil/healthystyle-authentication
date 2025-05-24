@@ -4,10 +4,8 @@ import java.util.List;
 
 import org.healthystyle.model.User;
 import org.healthystyle.model.role.Name;
-import org.healthystyle.model.sex.Type;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -28,6 +26,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
 	@Query("SELECT u FROM User u WHERE u.email LIKE '%:email%'")
 	User findByEmail(String email);
+
+	@Query("SELECT u.username FROM User u WHERE u.id = :id")
+	String findUsernameById(Long id);
 
 //	@Query("SELECT u FROM User u INNER JOIN Sex s ON u.sex = s WHERE "
 //			+ "(:name IS NULL OR (LOWER(CONCAT(u.firstName, ' ', u.lastName)) LIKE LOWER(%:name%))) "

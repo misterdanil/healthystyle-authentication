@@ -49,9 +49,10 @@ public class SecurityConfig {
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
 		httpSecurity
-				.authorizeHttpRequests(http -> http.dispatcherTypeMatchers(DispatcherType.FORWARD).permitAll().requestMatchers("/signup", "/signin", "/auth/checking", "/loginPage", "/assets/*").permitAll()
+				.authorizeHttpRequests(http -> http.dispatcherTypeMatchers(DispatcherType.FORWARD).permitAll()
+						.requestMatchers("/signup", "/signin", "/auth/checking", "/loginPage", "/assets/*").permitAll()
 						.anyRequest().authenticated())
-				.formLogin(fl ->  fl.loginPage("/login").permitAll()).csrf(csrf -> csrf.disable())
+				.formLogin(fl -> fl.loginPage("/login").permitAll()).csrf(csrf -> csrf.disable())
 				.cors(c -> c.configurationSource(corsConfigurationSource()))
 
 		/*
@@ -66,7 +67,7 @@ public class SecurityConfig {
 		DefaultSecurityFilterChain c = httpSecurity.build();
 		return c;
 	}
-	
+
 	@Bean
 	public CustomSavedRequestAwareAuthenticationSuccessHandler customSavedRequestAwareAuthenticationSuccessHandler() {
 		return new CustomSavedRequestAwareAuthenticationSuccessHandler();
@@ -115,18 +116,18 @@ public class SecurityConfig {
 
 	@Bean
 	public InMemoryRegisteredClientRepository registeredClientRepository() {
-		RegisteredClient healthClient = RegisteredClient.withId(UUID.randomUUID().toString()).clientId("health")
+		RegisteredClient healthClient = RegisteredClient.withId("1").clientId("health")
 				.clientSecret(passwordEncoder().encode("123456789"))
 				.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
 				.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
 				.authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-				.redirectUri("https://oidcdebugger.com/debug").scope(OidcScopes.OPENID)
+				.redirectUri("http://localhost:3001/auth/health").scope(OidcScopes.OPENID)
 				.tokenSettings(TokenSettings.builder().authorizationCodeTimeToLive(Duration.ofMinutes(5))
 						.accessTokenTimeToLive(Duration.ofMinutes(30)).refreshTokenTimeToLive(Duration.ofDays(30))
 						.reuseRefreshTokens(false).build())
 				.build();
 
-		RegisteredClient eventClient = RegisteredClient.withId(UUID.randomUUID().toString()).clientId("event")
+		RegisteredClient eventClient = RegisteredClient.withId("2").clientId("event")
 				.clientSecret(passwordEncoder().encode("123456789"))
 				.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
 				.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
@@ -136,7 +137,7 @@ public class SecurityConfig {
 						.accessTokenTimeToLive(Duration.ofMinutes(30)).refreshTokenTimeToLive(Duration.ofDays(30))
 						.reuseRefreshTokens(false).build())
 				.build();
-		RegisteredClient client = RegisteredClient.withId(UUID.randomUUID().toString()).clientId("johnsteve")
+		RegisteredClient client = RegisteredClient.withId("3").clientId("johnsteve")
 				.clientSecret(passwordEncoder().encode("123456789"))
 				.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
 				.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)

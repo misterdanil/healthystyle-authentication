@@ -2,6 +2,7 @@ package org.healthystyle.authentication.web;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.List;
 
 import org.healthystyle.authentication.service.UserService;
 import org.healthystyle.authentication.service.dto.UserSaveRequest;
@@ -38,10 +39,10 @@ import jakarta.servlet.http.HttpServletResponse;
 public class AuthController {
 	@Autowired
 	private UserService service;
-	
+
 	@Autowired
 	private UserMapper mapper;
-	
+
 	private SecurityContextRepository securityContextRepository = new HttpSessionSecurityContextRepository();
 
 	@GetMapping("/auth/checking")
@@ -82,7 +83,7 @@ public class AuthController {
 		return "/index.html";
 	}
 
-	@GetMapping("/users")
+	@GetMapping(value = "/users", params = "username")
 	public ResponseEntity<?> find(@RequestParam String username, @RequestParam int page, @RequestParam int limit) {
 		Page<User> users;
 		try {
@@ -90,7 +91,30 @@ public class AuthController {
 		} catch (ValidationException e) {
 			return ResponseEntity.badRequest().body(new ErrorResponse("1000", e.getGlobalErrors(), e.getFieldErrors()));
 		}
-		
+
+		return ResponseEntity.ok(users.map(mapper::toDto));
+	}
+
+	@GetMapping("/id")
+	@ResponseBody
+	public String getId() {
+		return SecurityContextHolder.getContext().getAuthentication().getName();
+	}
+
+	@GetMapping("/username")
+	@ResponseBody
+	public String getUsername() {
+		Long id = Long.valueOf(SecurityContextHolder.getContext().getAuthentication().getName());
+		String username = service.fetchUsernameById(id);
+
+		return username;
+	}
+
+	@GetMapping(value = "/users", params = "ids")
+	public ResponseEntity<?> getUsersByIds(@RequestParam List<Long> ids, @RequestParam int page,
+			@RequestParam int limit) {
+		Page<User> users = service.findByIds(ids, page, limit);
+
 		return ResponseEntity.ok(users.map(mapper::toDto));
 	}
 }

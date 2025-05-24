@@ -237,6 +237,11 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 //	}
 
 	@Override
+	public String fetchUsernameById(Long id) {
+		return userRepository.findUsernameById(id);
+	}
+
+	@Override
 	public boolean hasRole(long userId, long roleId) {
 		LOG.debug("Checking if user with role exists by user id '{}' and role id '{}'", userId, roleId);
 		boolean hasRole = userRepository.hasRole(userId, roleId);
