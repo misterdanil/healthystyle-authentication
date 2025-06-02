@@ -50,7 +50,7 @@ public class SecurityConfig {
 	public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
 		httpSecurity
 				.authorizeHttpRequests(http -> http.dispatcherTypeMatchers(DispatcherType.FORWARD).permitAll()
-						.requestMatchers("/signup", "/signin", "/auth/checking", "/loginPage", "/assets/*").permitAll()
+						.requestMatchers("/signup", "/signin", "/auth/checking", "/loginPage", "/assets/*", "/users").permitAll()
 						.anyRequest().authenticated())
 				.formLogin(fl -> fl.loginPage("/login").permitAll()).csrf(csrf -> csrf.disable())
 				.cors(c -> c.configurationSource(corsConfigurationSource()))
@@ -104,7 +104,7 @@ public class SecurityConfig {
 	public CorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration configuration = new CorsConfiguration();
 
-		configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://localhost:3002"));
+		configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://localhost:3002", "http://health-service:3001"));
 		configuration.setAllowedHeaders(Arrays.asList("*"));
 		configuration.setAllowedMethods(Arrays.asList("*"));
 		configuration.setAllowCredentials(true);
@@ -121,7 +121,7 @@ public class SecurityConfig {
 				.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
 				.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
 				.authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-				.redirectUri("http://localhost:3001/auth/health").scope(OidcScopes.OPENID)
+				.redirectUri("http://health-service:3001/auth/health").scope(OidcScopes.OPENID)
 				.tokenSettings(TokenSettings.builder().authorizationCodeTimeToLive(Duration.ofMinutes(5))
 						.accessTokenTimeToLive(Duration.ofMinutes(30)).refreshTokenTimeToLive(Duration.ofDays(30))
 						.reuseRefreshTokens(false).build())
@@ -132,7 +132,7 @@ public class SecurityConfig {
 				.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
 				.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
 				.authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-				.redirectUri("http://localhost:3002/auth/event").scope(OidcScopes.OPENID)
+				.redirectUri("http://event-service:3002/auth/event").scope(OidcScopes.OPENID)
 				.tokenSettings(TokenSettings.builder().authorizationCodeTimeToLive(Duration.ofMinutes(5))
 						.accessTokenTimeToLive(Duration.ofMinutes(30)).refreshTokenTimeToLive(Duration.ofDays(30))
 						.reuseRefreshTokens(false).build())

@@ -13,6 +13,7 @@ import org.healthystyle.authentication.service.error.user.UserYoungException;
 import org.healthystyle.authentication.web.dto.mapper.UserMapper;
 import org.healthystyle.model.User;
 import org.healthystyle.util.error.ErrorResponse;
+import org.healthystyle.util.oauth2.TokenService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -39,7 +40,6 @@ import jakarta.servlet.http.HttpServletResponse;
 public class AuthController {
 	@Autowired
 	private UserService service;
-
 	@Autowired
 	private UserMapper mapper;
 

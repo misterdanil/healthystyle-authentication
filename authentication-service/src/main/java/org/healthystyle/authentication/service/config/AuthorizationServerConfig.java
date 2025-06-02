@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -24,6 +25,8 @@ import org.springframework.security.oauth2.server.authorization.config.annotatio
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.web.DefaultSecurityFilterChain;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
@@ -59,8 +62,7 @@ public class AuthorizationServerConfig {
 		DefaultSecurityFilterChain ch = httpSecurity.cors(c -> c.configurationSource(corsConfigurationSource2()))
 				.formLogin(Customizer.withDefaults())
 				.exceptionHandling(eh -> eh.defaultAuthenticationEntryPointFor(
-						new LoginUrlAuthenticationEntryPoint("/loginPage"),
-						new AntPathRequestMatcher("/**")))
+						new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED), new AntPathRequestMatcher("/**")))
 
 				.build();
 		return ch;
@@ -70,7 +72,7 @@ public class AuthorizationServerConfig {
 	public CorsConfigurationSource corsConfigurationSource2() {
 		CorsConfiguration configuration = new CorsConfiguration();
 
-		configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://localhost:3002"));
+		configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://localhost:3002", "http://health-service:3001"));
 		configuration.setAllowedHeaders(Arrays.asList("*"));
 		configuration.setAllowedMethods(Arrays.asList("*"));
 		configuration.setAllowCredentials(true);
